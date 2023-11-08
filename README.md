@@ -39,6 +39,96 @@
 
 ### Ответ на задание 2
 
+**Сервера:**
+
+deb1 - 192.168.1.111 - master
+
+deb2 - 192.168.1.112 - slave 
+
+**Уставновка MySQL:**
+
+sudo apt update
+
+cd /tmp
+
+wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.28-1_all.deb
+
+sudo dpkg -i mysql-apt-config_0.8.28-1_all.deb
+
+sudo apt update
+
+sudo apt install -y mysql-server
+
+**Настройка Master:**
+
+Идем по пути и настраиваем конфиг
+
+sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+
+Добавляем строчки
+
+server-id = 1
+
+log_bin = /var/lib/mysql/mysql-bin.log
+
+![](https://github.com/alexei-golovin/SYS-23-12-06/blob/main/files/201.jpg)
+
+Перезапускаем MySQL
+
+sudo systemctl restart mysql.service
+
+Подключаемся к MySQL и содаем пользователя для репликации
+
+CREATE USER 'sys'@'192.168.1.112' IDENTIFIED BY '123456789';
+
+GRANT replication slave ON *.* TO 'sys'@'192.168.1.112';
+
+Проверяем статус Master-сервера
+
+SHOW MASTER STATUS;
+
+Берем для настройки для Slave-сервера
+
+![](https://github.com/alexei-golovin/SYS-23-12-06/blob/main/files/202.jpg)
+
+**Настройка Slave:**
+
+Идем по пути и настраиваем конфиг
+
+sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+
+Добавляем строчки
+
+server-id = 2
+
+log_bin = /var/log/mysql/mysql-bin.log
+
+relay_log = mysql-relay-bin
+
+![](https://github.com/alexei-golovin/SYS-23-12-06/blob/main/files/203.jpg)
+
+Перезапускаем MySQL
+
+sudo systemctl restart mysql.service
+
+Указываем параметры соединения (master-data)
+
+CHANGE MASTER TO MASTER_HOST = '192.168.1.111', MASTER_USER = 'sys', MASTER_PASSWORD = '123456789', MASTER_LOG_FILE = 'mysql-bin.000001', MASTER_LOG_POS = 388;
+
+Запускаем репликацию
+
+start slave;
+
+Проверяем статус репликации
+
+show slave status \G;
+
+![](https://github.com/alexei-golovin/SYS-23-12-06/blob/main/files/204.jpg)
+
+Проверяем работу репликации. У нас настроена репликация всей информации создаем на Master новую базу данных и проверяем ее наличие на Slave.
+
+![](https://github.com/alexei-golovin/SYS-23-12-06/blob/main/files/205.jpg)
+
 ---
 
 ## Дополнительные задания (со звёздочкой*)
