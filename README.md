@@ -111,7 +111,7 @@ relay_log = mysql-relay-bin
 
 sudo systemctl restart mysql.service
 
-Указываем параметры соединения (master-data)
+Подключаемся к MySQL и указываем параметры соединения (master-data)
 
 CHANGE MASTER TO MASTER_HOST = '192.168.1.111', MASTER_USER = 'sys', MASTER_PASSWORD = '123456789', MASTER_LOG_FILE = 'mysql-bin.000001', MASTER_LOG_POS = 388;
 
